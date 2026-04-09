@@ -17,30 +17,13 @@ jobs:
 
     outputs:
       version: ${{ steps.version.outputs.version }}
+      skipped: ${{ steps.check_tag.outputs.skipped }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: temurin
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Analyze
-        run: dart analyze lib/
 
       - name: Extract version from pubspec.yaml
         id: version
@@ -49,17 +32,48 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Detected version: $VERSION"
 
-      - name: Check tag does not already exist
+      - name: Check whether tag already exists
+        id: check_tag
         run: |
           if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
             echo "Tag v${{ steps.version.outputs.version }} already exists — skipping release."
-            exit 1
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Set up Java 17
+        if: steps.check_tag.outputs.skipped == 'false'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+
+      - name: Set up Flutter
+        if: steps.check_tag.outputs.skipped == 'false'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        if: steps.check_tag.outputs.skipped == 'false'
+        run: flutter pub get
+
+      - name: Analyze
+        if: steps.check_tag.outputs.skipped == 'false'
+        run: dart analyze lib/
+
+      - name: Run tests
+        if: steps.check_tag.outputs.skipped == 'false'
+        run: flutter test
+
       - name: Build APK (debug signing)
+        if: steps.check_tag.outputs.skipped == 'false'
         run: flutter build apk --release
 
       - name: Create and push git tag
+        if: steps.check_tag.outputs.skipped == 'false'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -67,6 +81,7 @@ jobs:
           git push origin "v${{ steps.version.outputs.version }}"
 
       - name: Publish GitHub Release
+        if: steps.check_tag.outputs.skipped == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
@@ -85,6 +100,7 @@ jobs:
   screenshots:
     name: Automated Screenshots
     needs: release
+    if: needs.release.outputs.skipped == 'false'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -156,7 +172,8 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   commit-screenshots:
     name: Commit screenshots to repo
-    needs: screenshots
+    needs: [release, screenshots]
+    if: needs.release.outputs.skipped == 'false'
     runs-on: ubuntu-latest
 
     steps:
