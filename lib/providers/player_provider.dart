@@ -296,7 +296,13 @@ class PlayerProvider extends ChangeNotifier {
   void cleanupTorrent() {
     if (_torrentDisposed) return;
     _torrentDisposed = true;
-    _engine.disposeTorrent(torrentId);
+    try {
+      _engine.disposeTorrent(torrentId);
+    } catch (_) {
+      // The torrent may have already been removed or never existed (e.g. in
+      // integration tests with a dummy torrentId). Swallow the error so that
+      // dispose() can finish cleanly.
+    }
   }
 
   @override
