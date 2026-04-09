@@ -1,0 +1,131 @@
+{
+    "@@locale": "en",
+    "appTitle": "Torrent Player",
+    "@appTitle": {
+        "description": "Application title"
+    },
+    "labelMagnetLink": "Magnet link",
+    "@labelMagnetLink": {},
+    "hintMagnetLink": "magnet:?xt=urn:btih:…",
+    "@hintMagnetLink": {},
+    "btnPlay": "Play",
+    "@btnPlay": {},
+    "btnOpenTorrent": "Open .torrent",
+    "@btnOpenTorrent": {},
+    "labelHistory": "History",
+    "@labelHistory": {},
+    "btnClearHistory": "Clear all",
+    "@btnClearHistory": {},
+    "confirmClearHistory": "Clear all history?",
+    "@confirmClearHistory": {},
+    "btnCancel": "Cancel",
+    "@btnCancel": {},
+    "btnConfirm": "Confirm",
+    "@btnConfirm": {},
+    "snackNoVideo": "No video files found in the torrent",
+    "@snackNoVideo": {},
+    "dialogSelectVideo": "Select video",
+    "@dialogSelectVideo": {},
+    "settingsTitle": "Settings",
+    "@settingsTitle": {},
+    "settingsSectionTorrent": "Torrent client",
+    "@settingsSectionTorrent": {},
+    "settingsDownloadSpeed": "Download limit",
+    "@settingsDownloadSpeed": {},
+    "settingsUploadSpeed": "Upload limit",
+    "@settingsUploadSpeed": {},
+    "settingsUnlimited": "Unlimited",
+    "@settingsUnlimited": {},
+    "settingsSectionPlayer": "Player",
+    "@settingsSectionPlayer": {},
+    "settingsCacheSeconds": "Cache ahead (seconds)",
+    "@settingsCacheSeconds": {},
+    "settingsDemuxerMaxMb": "Demuxer buffer (MB)",
+    "@settingsDemuxerMaxMb": {},
+    "settingsSectionLanguage": "Language",
+    "@settingsSectionLanguage": {},
+    "settingsLangEs": "Spanish",
+    "@settingsLangEs": {},
+    "settingsLangEn": "English",
+    "@settingsLangEn": {},
+    "castButtonTooltip": "Cast to TV",
+    "@castButtonTooltip": {},
+    "castDialogTitle": "Cast to device",
+    "@castDialogTitle": {},
+    "castNoDevices": "No Cast devices found on your WiFi",
+    "@castNoDevices": {},
+    "castConnecting": "Connecting…",
+    "@castConnecting": {},
+    "castUnknownTitle": "Unknown title",
+    "@castUnknownTitle": {},
+    "castCastingTo": "Casting to {device}",
+    "@castCastingTo": {
+        "placeholders": {
+            "device": {
+                "type": "String"
+            }
+        }
+    },
+    "castNoCaptions": "No captions available",
+    "@castNoCaptions": {},
+    "castCaptionsOff": "Off",
+    "@castCaptionsOff": {},
+    "castTrackFallback": "Track {id}",
+    "@castTrackFallback": {
+        "placeholders": {
+            "id": {
+                "type": "int"
+            }
+        }
+    },
+    "playerAudioTrack": "Audio",
+    "@playerAudioTrack": {},
+    "playerSubtitleTrack": "Subtitles",
+    "@playerSubtitleTrack": {},
+    "playerTrackOff": "Off",
+    "@playerTrackOff": {},
+    "playerTrackAuto": "Auto",
+    "@playerTrackAuto": {},
+    "playerTrackLabel": "Track {index}",
+    "@playerTrackLabel": {
+        "placeholders": {
+            "index": {
+                "type": "int"
+            }
+        }
+    },
+    "playerVolume": "Volume",
+    "@playerVolume": {},
+    "playerBrightness": "Brightness",
+    "@playerBrightness": {},
+    "playerSeekForward": "+{seconds}s",
+    "@playerSeekForward": {
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "playerSeekBackward": "-{seconds}s",
+    "@playerSeekBackward": {
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "playerBuffering": "Buffering…",
+    "@playerBuffering": {},
+    "playerDownloadSpeed": "Download",
+    "@playerDownloadSpeed": {},
+    "playerConnections": "Peers",
+    "@playerConnections": {},
+    "playerBufferedCache": "Buffer",
+    "@playerBufferedCache": {},
+    "playerDownloaded": "Downloaded",
+    "@playerDownloaded": {},
+    "castRetry": "Retry",
+    "@castRetry": {},
+    "castSearching": "Searching for devices…",
+    "@castSearching": {}
+}
