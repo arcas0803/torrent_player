@@ -129,20 +129,20 @@ jobs:
       - name: Run integration tests + capture screenshots
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
+          api-level: 31
           target: google_apis
           arch: x86_64
           profile: ${{ matrix.hw_profile }}
           avd-name: ${{ matrix.avd_name }}
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            flutter drive \
-              --driver=test_driver/integration_test.dart \
-              --target=integration_test/screenshot_test.dart \
-              -d emulator-5554
+            adb wait-for-device
+            flutter drive --driver=test_driver/integration_test.dart --target=integration_test/screenshot_test.dart -d emulator-5554
+            adb shell mkdir -p /sdcard/Pictures/screenshots || true
             mkdir -p screenshots/${{ matrix.profile }}
-            adb pull /sdcard/Pictures/screenshots/. screenshots/${{ matrix.profile }}/
+            adb pull /sdcard/Pictures/screenshots/ screenshots/${{ matrix.profile }}/ || true
+            ls -la screenshots/${{ matrix.profile }}/
 
       - name: Upload screenshots as artifact
         uses: actions/upload-artifact@v4

@@ -52,8 +52,7 @@ void main() {
 
     // Navigate to the player route using the app's own navigator so every
     // ancestor provider (SettingsProvider, CastProvider…) is available.
-    final navState =
-        tester.state<NavigatorState>(find.byType(Navigator).last);
+    final navState = tester.state<NavigatorState>(find.byType(Navigator).last);
     navState.pushNamed(
       '/player',
       arguments: const PlayerArgs(

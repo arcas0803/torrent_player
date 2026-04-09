@@ -4,7 +4,10 @@ import 'package:torrent_player/services/torrent_service.dart';
 
 void main() {
   test('PlayerArgs stores streamUrl and torrentId', () {
-    const args = PlayerArgs(streamUrl: 'http://localhost/video.mp4', torrentId: 42);
+    const args = PlayerArgs(
+      streamUrl: 'http://localhost/video.mp4',
+      torrentId: 42,
+    );
     expect(args.streamUrl, 'http://localhost/video.mp4');
     expect(args.torrentId, 42);
   });

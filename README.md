@@ -113,3 +113,5 @@ Distribuido bajo la licencia **GPL-3.0**. Ver [LICENSE](LICENSE) para más detal
 
 > **Nota:** Este proyecto utiliza `libtorrent_flutter` (GPL-3.0) y `media_kit` (MIT).
 > Asegúrate de respetar los términos de cada dependencia al distribuir la app.
+
+
