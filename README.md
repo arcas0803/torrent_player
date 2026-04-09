@@ -15,17 +15,6 @@
 
 ---
 
-## Screenshots
-
-| | Home | Player | Settings |
-|---|---|---|---|
-| **Phone** | ![Home phone](screenshots/phone/01_home_phone.png) | ![Player phone](screenshots/phone/03_player_phone.png) | ![Settings phone](screenshots/phone/02_settings_phone.png) |
-| **Tablet** | ![Home tablet](screenshots/tablet/01_home_phone.png) | ![Player tablet](screenshots/tablet/03_player_phone.png) | ![Settings tablet](screenshots/tablet/02_settings_phone.png) |
-
-> Screenshots generados automáticamente en cada release mediante [GitHub Actions](.github/workflows/release.yml).
-
----
-
 ## Features
 
 - **Streaming progresivo** — el vídeo empieza a reproducirse en segundos gracias a un servidor HTTP local (libtorrent 2.0).
@@ -85,7 +74,6 @@ Las releases se publican automáticamente cada vez que se hace push a `master`. 
 1. **Analiza** el código con `dart analyze`.
 2. **Construye** el APK de release.
 3. **Publica** la release en GitHub con el APK adjunto.
-4. **Genera screenshots** en un emulador Android y los guarda en este repositorio.
 
 Descarga siempre la última versión desde la sección [**Releases**](https://github.com/arcas0803/torrent_player/releases).
 
