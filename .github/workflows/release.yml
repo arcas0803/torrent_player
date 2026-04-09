@@ -101,7 +101,7 @@ jobs:
     name: Automated Screenshots
     needs: release
     if: needs.release.outputs.skipped == 'false'
-    runs-on: ubuntu-latest
+    runs-on: macos-15
     strategy:
       fail-fast: false
       matrix:
@@ -135,19 +135,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Enable KVM (faster emulator)
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
-            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
       - name: Run integration tests + capture screenshots
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
           target: google_apis
-          arch: x86_64
+          arch: arm64-v8a
           profile: ${{ matrix.hw_profile }}
           avd-name: ${{ matrix.avd_name }}
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
