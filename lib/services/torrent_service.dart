@@ -13,7 +13,10 @@ class TorrentService {
   /// Initialises the libtorrent engine and fetches public trackers.
   Future<void> init() async {
     if (_initialized) return;
-    await LibtorrentFlutter.init(fetchTrackers: true);
+    await LibtorrentFlutter.init(
+      fetchTrackers: true,
+      pollInterval: const Duration(milliseconds: 250),
+    );
     _initialized = true;
   }
 

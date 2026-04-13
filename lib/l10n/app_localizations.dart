@@ -385,6 +385,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Searching for devices…'**
   String get castSearching;
+
+  /// No description provided for @castDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop casting'**
+  String get castDisconnect;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get updateAvailable;
+
+  /// No description provided for @updateVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available'**
+  String updateVersion(String version);
+
+  /// No description provided for @updateDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get updateDownload;
+
+  /// No description provided for @updateLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'You have the latest version'**
+  String get updateLatest;
+
+  /// No description provided for @updateChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for updates…'**
+  String get updateChecking;
+
+  /// No description provided for @settingsSectionUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get settingsSectionUpdates;
+
+  /// No description provided for @settingsCheckUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get settingsCheckUpdates;
+
+  /// No description provided for @backgroundNotifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Torrent Player'**
+  String get backgroundNotifTitle;
+
+  /// No description provided for @backgroundNotifText.
+  ///
+  /// In en, this message translates to:
+  /// **'Download in progress'**
+  String get backgroundNotifText;
 }
 
 class _AppLocalizationsDelegate

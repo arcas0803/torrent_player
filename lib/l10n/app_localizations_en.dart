@@ -161,4 +161,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get castSearching => 'Searching for devices…';
+
+  @override
+  String get castDisconnect => 'Stop casting';
+
+  @override
+  String get updateAvailable => 'Update available';
+
+  @override
+  String updateVersion(String version) {
+    return 'Version $version is available';
+  }
+
+  @override
+  String get updateDownload => 'Download';
+
+  @override
+  String get updateLatest => 'You have the latest version';
+
+  @override
+  String get updateChecking => 'Checking for updates…';
+
+  @override
+  String get settingsSectionUpdates => 'Updates';
+
+  @override
+  String get settingsCheckUpdates => 'Check for updates';
+
+  @override
+  String get backgroundNotifTitle => 'Torrent Player';
+
+  @override
+  String get backgroundNotifText => 'Download in progress';
 }

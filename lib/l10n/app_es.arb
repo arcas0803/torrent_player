@@ -47,5 +47,15 @@
     "playerBufferedCache": "Búfer",
     "playerDownloaded": "Descargado",
     "castRetry": "Reintentar",
-    "castSearching": "Buscando dispositivos…"
+    "castSearching": "Buscando dispositivos…",
+    "castDisconnect": "Detener reproducción",
+    "updateAvailable": "Actualización disponible",
+    "updateVersion": "La versión {version} está disponible",
+    "updateDownload": "Descargar",
+    "updateLatest": "Ya tienes la última versión",
+    "updateChecking": "Buscando actualizaciones…",
+    "settingsSectionUpdates": "Actualizaciones",
+    "settingsCheckUpdates": "Buscar actualizaciones",
+    "backgroundNotifTitle": "Torrent Player",
+    "backgroundNotifText": "Descarga en progreso"
 }

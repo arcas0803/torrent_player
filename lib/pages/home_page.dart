@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chrome_cast/widgets.dart';
 import 'package:libtorrent_flutter/libtorrent_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -28,6 +27,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _magnetController = TextEditingController();
   StreamSubscription<String>? _intentSub;
+  bool _isFromDeepLink = false;
 
   bool get _isMagnetValid =>
       _magnetController.text.trim().startsWith('magnet:');
@@ -58,6 +58,7 @@ class _HomePageState extends State<HomePage> {
   /// Populates the UI from an incoming [uri] (magnet link or .torrent path)
   /// and starts loading immediately.
   void _handleIncomingUri(String uri) {
+    _isFromDeepLink = true;
     final torrent = context.read<TorrentProvider>();
     // Reset any in-progress or completed torrent before starting the new one.
     if (torrent.state != TorrentLoadState.idle) torrent.reset();
@@ -87,7 +88,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _pickTorrentFile() async {
     final torrent = context.read<TorrentProvider>();
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['torrent'],
     );
@@ -109,11 +110,18 @@ class _HomePageState extends State<HomePage> {
   void _startPlaying(TorrentProvider torrent, FileInfo file) {
     final url = torrent.startStream(file);
     _magnetController.clear();
-    Navigator.pushNamed(
-      context,
-      '/player',
-      arguments: PlayerArgs(streamUrl: url, torrentId: torrent.torrentId!),
-    );
+    final args = PlayerArgs(streamUrl: url, torrentId: torrent.torrentId!);
+    if (_isFromDeepLink) {
+      _isFromDeepLink = false;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/player',
+        (route) => route.isFirst,
+        arguments: args,
+      );
+    } else {
+      Navigator.pushNamed(context, '/player', arguments: args);
+    }
   }
 
   Future<void> _showFilePicker(TorrentProvider torrent) async {
@@ -160,22 +168,14 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          body: Stack(
-            children: [
-              SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: _buildInputSection(torrent, l),
-                  ),
-                ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: _buildInputSection(torrent, l),
               ),
-              const Align(
-                alignment: Alignment.bottomCenter,
-                child: GoogleCastMiniController(),
-              ),
-            ],
+            ),
           ),
         );
       },

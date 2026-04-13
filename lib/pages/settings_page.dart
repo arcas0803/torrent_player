@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
+import '../services/update_service.dart';
 
 /// Settings screen exposing torrent speed limits, mpv cache/demuxer
 /// configuration, and language selection.
@@ -70,6 +72,9 @@ class SettingsPage extends StatelessWidget {
                   ],
                 ),
               ),
+              const Divider(),
+              _SectionHeader(l.settingsSectionUpdates),
+              const _UpdatesSection(),
             ],
           );
         },
@@ -188,6 +193,98 @@ class _SliderTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Updates section
+// ---------------------------------------------------------------------------
+
+/// Stateful tile that lets the user manually check for app updates.
+class _UpdatesSection extends StatefulWidget {
+  const _UpdatesSection();
+
+  @override
+  State<_UpdatesSection> createState() => _UpdatesSectionState();
+}
+
+class _UpdatesSectionState extends State<_UpdatesSection> {
+  bool _checking = false;
+  String? _resultMessage;
+
+  Future<void> _check() async {
+    final l = AppLocalizations.of(context)!;
+    setState(() {
+      _checking = true;
+      _resultMessage = null;
+    });
+    final update = await UpdateService.checkForUpdate();
+    if (!mounted) return;
+    setState(() => _checking = false);
+    if (update != null) {
+      showDialog<void>(
+        context: context,
+        builder: (_) => _UpdateSettingsDialog(
+          version: update.version,
+          downloadUrl: update.downloadUrl,
+        ),
+      );
+    } else {
+      setState(() => _resultMessage = l.updateLatest);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return ListTile(
+      title: Text(l.settingsCheckUpdates),
+      subtitle: _resultMessage != null ? Text(_resultMessage!) : null,
+      trailing: _checking
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : null,
+      onTap: _checking ? null : _check,
+    );
+  }
+}
+
+/// Dialog shown from Settings when a new version is found.
+class _UpdateSettingsDialog extends StatelessWidget {
+  final String version;
+  final String downloadUrl;
+
+  const _UpdateSettingsDialog({
+    required this.version,
+    required this.downloadUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l.updateAvailable),
+      content: Text(l.updateVersion(version)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l.btnCancel),
+        ),
+        FilledButton(
+          onPressed: () async {
+            Navigator.pop(context);
+            final uri = Uri.parse(downloadUrl);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+          child: Text(l.updateDownload),
+        ),
+      ],
     );
   }
 }

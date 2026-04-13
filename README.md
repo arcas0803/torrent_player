@@ -2,7 +2,7 @@
 
 # 🎬 Torrent Player
 
-**Reproduce vídeos directamente desde torrents — sin esperar a que descarguen.**
+**Stream videos directly from torrents — no waiting for them to download.**
 
 [![Android](https://img.shields.io/badge/Android-API_21%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-54C5F8?logo=flutter&logoColor=white)](https://flutter.dev)
@@ -17,50 +17,55 @@
 
 ## Features
 
-- **Streaming progresivo** — el vídeo empieza a reproducirse en segundos gracias a un servidor HTTP local (libtorrent 2.0).
-- **Magnet links & archivos `.torrent`** — pega un magnet link o abre un archivo directamente desde el gestor de archivos, otras apps o el navegador.
-- **Intents nativos** — la app se registra como gestor del esquema `magnet:` y del tipo MIME `application/x-bittorrent`.
-- **Reproductor completo** — controles de reproducción, seekbar con posición y duración, volumen y brillo ajustables con swipe.
-- **Chromecast** — envía el stream a cualquier dispositivo Cast de tu red local.
-- **Tarjeta de estado** — velocidad de descarga/upload, ratio de semillas, porcentaje descargado y MB descargados en tiempo real.
-- **Historial de magnets** — guarda los últimos links usados para acceso rápido.
-- **Diseño adaptativo** — layout en columna única en teléfonos; panel dual en tablets (≥ 600 dp).
-- **Material 3 / tema oscuro** — interfaz limpia en modo oscuro por defecto.
+- **Progressive streaming** — playback starts within seconds via a local HTTP server powered by libtorrent 2.0.
+- **Magnet links & `.torrent` files** — paste a magnet link or open a torrent file directly from the file manager, other apps, or the browser.
+- **Native intents** — the app registers as a handler for the `magnet:` scheme and `application/x-bittorrent` MIME type.
+- **Full-featured player** — playback controls, seekbar with position and duration, swipe gestures for volume and brightness.
+- **Picture-in-Picture (PiP)** — tap the PiP button to shrink the player into a floating overlay while using other apps.
+- **Background playback** — when the app is sent to the background mid-playback, a foreground service keeps the stream alive with a persistent notification.
+- **Chromecast** — cast the stream to any Cast-enabled device on your local network via a dedicated cast screen.
+- **Auto-updater** — on launch the app silently checks GitHub Releases and shows a dialog if a new version is available.
+- **Status card** — live download/upload speed, seed ratio, download percentage, and total MB downloaded.
+- **Magnet history** — saves the last 20 used links for quick access.
+- **Adaptive layout** — single-column on phones; dual-pane on tablets (≥ 600 dp).
+- **Material 3 / dark theme** — clean dark-mode interface by default.
+- **Localisation** — English and Spanish built in.
 
 ---
 
 ## Platform Support
 
-| Plataforma | Soporte |
+| Platform | Support |
 |---|---|
-| Android 5.0+ (API 21+) | ✅ |
-| iOS | ❌ (no planificado) |
-| Desktop / Web | ❌ (no planificado) |
+| Android 5.0+ (API 21+) | ✅ Fully supported |
+| iOS | ❌ No plans |
+| macOS / Linux / Windows | 🔜 Planned |
+| Web | ❌ No plans |
 
 ---
 
 ## Getting Started
 
-### Requisitos
+### Requirements
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) ≥ 3.x
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) ≥ 3.11
 - Android SDK / Android Studio
-- Un dispositivo o emulador Android (API 21+)
+- An Android device or emulator (API 21+)
 
-### Build desde el código fuente
+### Build from source
 
 ```bash
-# 1. Clonar el repositorio
+# 1. Clone the repository
 git clone https://github.com/arcas0803/torrent_player.git
 cd torrent_player
 
-# 2. Instalar dependencias
+# 2. Install dependencies
 flutter pub get
 
-# 3. Ejecutar en un dispositivo conectado
+# 3. Run on a connected device
 flutter run
 
-# 4. Generar APK de release (firma debug, sin keystore adicional)
+# 4. Build a release APK
 flutter build apk --release
 # → build/app/outputs/flutter-apk/app-release.apk
 ```
@@ -69,35 +74,36 @@ flutter build apk --release
 
 ## Releases
 
-Las releases se publican automáticamente cada vez que se hace push a `master`. El workflow de CI/CD:
+Releases are published automatically on every push to `master`. The CI/CD workflow:
 
-1. **Analiza** el código con `dart analyze`.
-2. **Construye** el APK de release.
-3. **Publica** la release en GitHub con el APK adjunto.
+1. **Analyses** the code with `dart analyze`.
+2. **Runs** the unit test suite with `flutter test`.
+3. **Builds** the release APK.
+4. **Tags** the commit as `v{version}` and **publishes** the GitHub Release with the APK attached.
 
-Descarga siempre la última versión desde la sección [**Releases**](https://github.com/arcas0803/torrent_player/releases).
+Always download the latest version from the [**Releases**](https://github.com/arcas0803/torrent_player/releases) section.
 
 ---
 
 ## Contributing
 
-Las contribuciones son bienvenidas. Por favor, trabaja sobre la rama `dev`:
+Contributions are welcome. Please work off the `dev` branch:
 
 ```bash
 git checkout dev
-git checkout -b feature/mi-mejora
-# … tus cambios …
-git push origin feature/mi-mejora
-# Abre un Pull Request hacia dev
+git checkout -b feature/my-improvement
+# … your changes …
+git push origin feature/my-improvement
+# Open a Pull Request targeting dev
 ```
 
-Los merges a `master` son los que disparan la release automática.
+Merges to `master` trigger the automatic release.
 
 ---
 
 ## License
 
-Distribuido bajo la licencia **GPL-3.0**. Ver [LICENSE](LICENSE) para más detalles.
+Distributed under the **GPL-3.0** licence. See [LICENSE](LICENSE) for details.
 
 > **Nota:** Este proyecto utiliza `libtorrent_flutter` (GPL-3.0) y `media_kit` (MIT).
 > Asegúrate de respetar los términos de cada dependencia al distribuir la app.

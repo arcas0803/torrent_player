@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:floating/floating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
@@ -10,6 +14,7 @@ import '../providers/cast_provider.dart';
 import '../providers/player_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/volume_provider.dart';
+import '../services/background_service.dart';
 import '../widgets/cast_device_dialog.dart';
 import '../widgets/player_overlay_widgets.dart';
 
@@ -43,6 +48,12 @@ class _PlayerPageState extends State<PlayerPage> with WidgetsBindingObserver {
   late final VolumeProvider _volumeProvider;
   late final BrightnessProvider _brightnessProvider;
   late final PlayerProvider _playerProvider;
+  CastProvider? _castProvider;
+  bool _castingPrev = false;
+
+  Floating? _floating;
+  StreamSubscription<PiPStatus>? _pipSub;
+  bool _inPip = false;
 
   @override
   void initState() {
@@ -67,10 +78,46 @@ class _PlayerPageState extends State<PlayerPage> with WidgetsBindingObserver {
       volumeProvider: _volumeProvider,
       brightnessProvider: _brightnessProvider,
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _castProvider = context.read<CastProvider>();
+      _castingPrev = _castProvider!.isCasting;
+      _castProvider!.addListener(_onCastChanged);
+    });
+
+    if (Platform.isAndroid) {
+      _floating = Floating();
+      _pipSub = _floating!.pipStatusStream.listen((status) {
+        if (mounted) setState(() => _inPip = status == PiPStatus.enabled);
+      });
+    }
+  }
+
+  void _onCastChanged() {
+    final isCasting = _castProvider?.isCasting ?? false;
+    if (!_castingPrev && isCasting && mounted) {
+      _castingPrev = true;
+      _playerProvider.pauseForCast();
+      Navigator.pushNamed(context, '/cast');
+    } else if (_castingPrev && !isCasting) {
+      _castingPrev = false;
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (Platform.isAndroid) {
+      if (state == AppLifecycleState.paused && !_inPip) {
+        _playerProvider.player.pause();
+        BackgroundService.start(
+          title: 'Torrent Player',
+          text: 'Download in progress',
+        );
+      } else if (state == AppLifecycleState.resumed && !_inPip) {
+        BackgroundService.stop();
+      }
+    }
     if (state == AppLifecycleState.detached) {
       _playerProvider.cleanupTorrent();
     }
@@ -78,6 +125,11 @@ class _PlayerPageState extends State<PlayerPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _castProvider?.removeListener(_onCastChanged);
+    _pipSub?.cancel();
+    if (Platform.isAndroid) {
+      BackgroundService.stop();
+    }
     WidgetsBinding.instance.removeObserver(this);
     _playerProvider.dispose();
     _volumeProvider.dispose();
@@ -92,10 +144,12 @@ class _PlayerPageState extends State<PlayerPage> with WidgetsBindingObserver {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<VolumeProvider>.value(value: _volumeProvider),
-        ChangeNotifierProvider<BrightnessProvider>.value(value: _brightnessProvider),
+        ChangeNotifierProvider<BrightnessProvider>.value(
+          value: _brightnessProvider,
+        ),
         ChangeNotifierProvider<PlayerProvider>.value(value: _playerProvider),
       ],
-      child: const _PlayerBody(),
+      child: _PlayerBody(floating: _floating),
     );
   }
 }
@@ -108,7 +162,10 @@ class _PlayerPageState extends State<PlayerPage> with WidgetsBindingObserver {
 /// [PlayerProvider], [VolumeProvider], and [BrightnessProvider].
 /// Contains no business logic — every user action is delegated to a provider.
 class _PlayerBody extends StatelessWidget {
-  const _PlayerBody();
+  /// Android PiP controller. `null` on non-Android platforms.
+  final Floating? floating;
+
+  const _PlayerBody({required this.floating});
 
   // ---- Track selection sheets (require BuildContext) ----
 
@@ -229,6 +286,18 @@ class _PlayerBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (floating == null) {
+      return _buildScaffold(context, inPip: false);
+    }
+    return StreamBuilder<PiPStatus>(
+      stream: floating!.pipStatusStream,
+      initialData: PiPStatus.disabled,
+      builder: (context, snap) =>
+          _buildScaffold(context, inPip: snap.data == PiPStatus.enabled),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, {required bool inPip}) {
     final prov = context.watch<PlayerProvider>();
     final cast = context.watch<CastProvider>();
     final size = MediaQuery.of(context).size;
@@ -249,85 +318,88 @@ class _PlayerBody extends StatelessWidget {
           ),
 
           // Gesture layer
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: prov.toggleControls,
-              onDoubleTapDown: (details) {
-                final isRight = details.globalPosition.dx > size.width / 2;
-                prov.onDoubleTapSeek(isRight);
-              },
-              onDoubleTap: () {},
-              onVerticalDragStart: (d) =>
-                  prov.onVerticalDragStart(d.globalPosition.dx, size.width),
-              onVerticalDragUpdate: (d) =>
-                  prov.onVerticalDragUpdate(d.delta.dy, size.height),
-              onVerticalDragEnd: (_) => prov.onVerticalDragEnd(),
+          if (!inPip)
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: prov.toggleControls,
+                onDoubleTapDown: (details) {
+                  final isRight = details.globalPosition.dx > size.width / 2;
+                  prov.onDoubleTapSeek(isRight);
+                },
+                onDoubleTap: () {},
+                onVerticalDragStart: (d) =>
+                    prov.onVerticalDragStart(d.globalPosition.dx, size.width),
+                onVerticalDragUpdate: (d) =>
+                    prov.onVerticalDragUpdate(d.delta.dy, size.height),
+                onVerticalDragEnd: (_) => prov.onVerticalDragEnd(),
+              ),
             ),
-          ),
 
           // Seek indicators (YouTube style)
-          if (prov.showSeekIndicatorLeft)
-            SeekIndicator(
-              left: true,
-              seconds: prov.tapSeekSeconds,
-              safePadding: safePadding,
-            ),
-          if (prov.showSeekIndicatorRight)
-            SeekIndicator(
-              left: false,
-              seconds: prov.tapSeekSeconds,
-              safePadding: safePadding,
+          if (!inPip) ...[
+            if (prov.showSeekIndicatorLeft)
+              SeekIndicator(
+                left: true,
+                seconds: prov.tapSeekSeconds,
+                safePadding: safePadding,
+              ),
+            if (prov.showSeekIndicatorRight)
+              SeekIndicator(
+                left: false,
+                seconds: prov.tapSeekSeconds,
+                safePadding: safePadding,
+              ),
+
+            // Volume / brightness swipe indicator
+            if (prov.isSwiping)
+              SwipeIndicator(
+                isVolume: prov.swipeIsVolume,
+                value: prov.currentSwipeValue,
+              ),
+
+            // Buffering spinner
+            StreamBuilder<bool>(
+              stream: prov.player.stream.buffering,
+              builder: (ctx, snap) {
+                if (!(snap.data ?? true)) return const SizedBox.shrink();
+                return const Positioned.fill(
+                  child: Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                );
+              },
             ),
 
-          // Volume / brightness swipe indicator
-          if (prov.isSwiping)
-            SwipeIndicator(
-              isVolume: prov.swipeIsVolume,
-              value: prov.currentSwipeValue,
-            ),
-
-          // Buffering spinner
-          StreamBuilder<bool>(
-            stream: prov.player.stream.buffering,
-            builder: (ctx, snap) {
-              if (!(snap.data ?? true)) return const SizedBox.shrink();
-              return const Positioned.fill(
-                child: Center(
-                  child: CircularProgressIndicator(color: Colors.white),
-                ),
-              );
-            },
-          ),
-
-          // Controls overlay
-          AnimatedOpacity(
-            opacity: prov.controlsVisible ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 250),
-            child: IgnorePointer(
-              ignoring: !prov.controlsVisible,
-              child: Container(
-                color: Colors.black38,
-                child: SafeArea(
-                  child: Column(
-                    children: [
-                      _buildTopBar(context, safePadding, prov, cast),
-                      const Spacer(),
-                      _buildCenterControls(prov),
-                      const Spacer(),
-                      _buildSeekBar(context, prov),
-                      const SizedBox(height: 8),
-                      FrostStatsCard(
-                        torrentInfo: prov.torrentInfo,
-                        streamInfo: prov.streamInfo,
-                      ),
-                      SizedBox(height: safePadding.bottom + 8),
-                    ],
+            // Controls overlay
+            AnimatedOpacity(
+              opacity: prov.controlsVisible ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 250),
+              child: IgnorePointer(
+                ignoring: !prov.controlsVisible,
+                child: Container(
+                  color: Colors.black38,
+                  child: SafeArea(
+                    child: Column(
+                      children: [
+                        _buildTopBar(context, safePadding, prov, cast),
+                        const Spacer(),
+                        _buildCenterControls(prov),
+                        const Spacer(),
+                        _buildSeekBar(context, prov),
+                        const SizedBox(height: 8),
+                        FrostStatsCard(
+                          torrentInfo: prov.torrentInfo,
+                          streamInfo: prov.streamInfo,
+                        ),
+                        SizedBox(height: safePadding.bottom + 8),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -354,6 +426,15 @@ class _PlayerBody extends StatelessWidget {
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
           const Spacer(),
+          if (floating != null)
+            IconButton(
+              onPressed: () => floating!.enable(const ImmediatePiP()),
+              icon: const Icon(
+                Icons.picture_in_picture_alt,
+                color: Colors.white,
+              ),
+              tooltip: 'PiP',
+            ),
           StreamBuilder<Tracks>(
             stream: prov.player.stream.tracks,
             builder: (ctx, snap) {
@@ -371,8 +452,9 @@ class _PlayerBody extends StatelessWidget {
                     IconButton(
                       onPressed: () => _showSubtitleTrackPicker(context),
                       icon: const Icon(Icons.subtitles, color: Colors.white),
-                      tooltip:
-                          AppLocalizations.of(context)!.playerSubtitleTrack,
+                      tooltip: AppLocalizations.of(
+                        context,
+                      )!.playerSubtitleTrack,
                     ),
                 ],
               );
@@ -436,11 +518,11 @@ class _PlayerBody extends StatelessWidget {
           builder: (ctx, durSnap) {
             final position = posSnap.data ?? Duration.zero;
             final duration = durSnap.data ?? const Duration(seconds: 1);
-            final max = duration.inMilliseconds
-                .toDouble()
-                .clamp(1.0, double.infinity);
-            final value =
-                position.inMilliseconds.toDouble().clamp(0.0, max);
+            final max = duration.inMilliseconds.toDouble().clamp(
+              1.0,
+              double.infinity,
+            );
+            final value = position.inMilliseconds.toDouble().clamp(0.0, max);
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -467,9 +549,8 @@ class _PlayerBody extends StatelessWidget {
                       child: Slider(
                         value: value,
                         max: max,
-                        onChanged: (v) => prov.player.seek(
-                          Duration(milliseconds: v.round()),
-                        ),
+                        onChanged: (v) =>
+                            prov.player.seek(Duration(milliseconds: v.round())),
                         onChangeStart: (_) => prov.cancelHideTimer(),
                         onChangeEnd: (_) => prov.resetHideTimer(),
                       ),

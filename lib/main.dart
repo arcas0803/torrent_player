@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 
 import 'app.dart';
+import 'services/background_service.dart';
 import 'services/torrent_service.dart';
 
 /// Application entry point.
@@ -11,6 +12,7 @@ import 'services/torrent_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+  BackgroundService.init();
   await TorrentService.instance.init();
   runApp(const App());
 }

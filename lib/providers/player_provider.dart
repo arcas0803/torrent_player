@@ -246,6 +246,11 @@ class PlayerProvider extends ChangeNotifier {
     return h > 0 ? '$h:$m:$s' : '$m:$s';
   }
 
+  /// Pauses local playback when Chromecast takes over.
+  void pauseForCast() {
+    _player.pause();
+  }
+
   // ---- Lifecycle ----
 
   Future<void> _init() async {

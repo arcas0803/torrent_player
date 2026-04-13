@@ -127,5 +127,31 @@
     "castRetry": "Retry",
     "@castRetry": {},
     "castSearching": "Searching for devices…",
-    "@castSearching": {}
+    "@castSearching": {},
+    "castDisconnect": "Stop casting",
+    "@castDisconnect": {},
+    "updateAvailable": "Update available",
+    "@updateAvailable": {},
+    "updateVersion": "Version {version} is available",
+    "@updateVersion": {
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "updateDownload": "Download",
+    "@updateDownload": {},
+    "updateLatest": "You have the latest version",
+    "@updateLatest": {},
+    "updateChecking": "Checking for updates…",
+    "@updateChecking": {},
+    "settingsSectionUpdates": "Updates",
+    "@settingsSectionUpdates": {},
+    "settingsCheckUpdates": "Check for updates",
+    "@settingsCheckUpdates": {},
+    "backgroundNotifTitle": "Torrent Player",
+    "@backgroundNotifTitle": {},
+    "backgroundNotifText": "Download in progress",
+    "@backgroundNotifText": {}
 }

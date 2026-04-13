@@ -28,6 +28,7 @@ enum CastDiscoveryState {
 class CastProvider extends ChangeNotifier {
   CastDiscoveryState _discoveryState = CastDiscoveryState.idle;
   bool _isCasting = false;
+  String? _castDeviceName;
   Timer? _searchTimer;
 
   /// Current discovery state.
@@ -35,6 +36,9 @@ class CastProvider extends ChangeNotifier {
 
   /// Whether a Cast session is currently active and streaming media.
   bool get isCasting => _isCasting;
+
+  /// Friendly name of the device currently being cast to.
+  String? get castDeviceName => _castDeviceName;
 
   /// Live stream of discovered [GoogleCastDevice] instances on the network.
   Stream<List<GoogleCastDevice>> get devicesStream =>
@@ -79,6 +83,7 @@ class CastProvider extends ChangeNotifier {
   Future<void> connectAndCast(GoogleCastDevice device, String streamUrl) async {
     stopDiscovery();
     _isCasting = true;
+    _castDeviceName = device.friendlyName;
     notifyListeners();
 
     try {
@@ -103,14 +108,30 @@ class CastProvider extends ChangeNotifier {
       );
     } catch (_) {
       _isCasting = false;
+      _castDeviceName = null;
       notifyListeners();
     }
+  }
+
+  /// Pauses playback on the remote Cast device.
+  Future<void> pauseRemote() async {
+    try {
+      await GoogleCastRemoteMediaClient.instance.pause();
+    } catch (_) {}
+  }
+
+  /// Resumes playback on the remote Cast device.
+  Future<void> resumeRemote() async {
+    try {
+      await GoogleCastRemoteMediaClient.instance.play();
+    } catch (_) {}
   }
 
   /// Ends the current Cast session and stops casting.
   void disconnect() {
     GoogleCastSessionManager.instance.endSessionAndStopCasting();
     _isCasting = false;
+    _castDeviceName = null;
     notifyListeners();
   }
 

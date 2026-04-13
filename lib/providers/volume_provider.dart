@@ -1,5 +1,5 @@
+import 'package:device_volume/device_volume.dart';
 import 'package:flutter/foundation.dart';
-import 'package:volume_controller/volume_controller.dart';
 
 /// Manages device audio volume and exposes it as reactive state.
 ///
@@ -10,11 +10,10 @@ class VolumeProvider extends ChangeNotifier {
   /// Current volume level in the 0–1 range.
   double get value => _value;
 
-  /// Reads the current system volume and hides the native volume UI overlay.
+  /// Reads the current system volume.
   Future<void> init() async {
     try {
-      _value = await VolumeController().getVolume();
-      VolumeController().showSystemUI = false;
+      _value = DeviceVolume.getVolume() / 100.0;
     } catch (_) {}
     notifyListeners();
   }
@@ -22,13 +21,7 @@ class VolumeProvider extends ChangeNotifier {
   /// Sets volume to [v] (clamped 0–1) and applies it to the device.
   void setValue(double v) {
     _value = v.clamp(0.0, 1.0);
-    VolumeController().setVolume(_value);
+    DeviceVolume.setVolume((_value * 100).round(), showSystemUi: false);
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    VolumeController().showSystemUI = true;
-    super.dispose();
   }
 }

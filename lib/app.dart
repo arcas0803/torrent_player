@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'l10n/app_localizations.dart';
+import 'pages/cast_page.dart';
 import 'pages/home_page.dart';
 import 'pages/player_page.dart';
 import 'pages/settings_page.dart';
@@ -15,6 +16,8 @@ import 'providers/cast_provider.dart';
 import 'providers/magnet_history_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/torrent_provider.dart';
+import 'services/update_service.dart';
+import 'widgets/update_dialog.dart';
 
 /// Root widget of the Torrent Player application.
 ///
@@ -34,6 +37,20 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
     _initCast();
+    _checkForUpdate();
+  }
+
+  void _checkForUpdate() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final update = await UpdateService.checkForUpdate();
+      if (update != null && mounted) {
+        showDialog<void>(
+          context: context,
+          builder: (_) => UpdateDialog(info: update),
+        );
+      }
+    });
   }
 
   void _initCast() {
@@ -100,6 +117,8 @@ class _AppState extends State<App> {
                   return MaterialPageRoute(
                     builder: (_) => const SettingsPage(),
                   );
+                case '/cast':
+                  return MaterialPageRoute(builder: (_) => const CastPage());
                 default:
                   return MaterialPageRoute(builder: (_) => const HomePage());
               }
