@@ -100,8 +100,13 @@ class _PlayerPageState extends State<PlayerPage> with WidgetsBindingObserver {
       _castingPrev = true;
       _playerProvider.pauseForCast();
       Navigator.pushNamed(context, '/cast');
-    } else if (_castingPrev && !isCasting) {
+    } else if (_castingPrev && !isCasting && mounted) {
       _castingPrev = false;
+      final lastPos = _castProvider?.lastCastPosition ?? Duration.zero;
+      if (lastPos > Duration.zero) {
+        _playerProvider.player.seek(lastPos);
+      }
+      _playerProvider.player.play();
     }
   }
 
@@ -338,6 +343,12 @@ class _PlayerBody extends StatelessWidget {
 
           // Seek indicators (YouTube style)
           if (!inPip) ...[
+            // Ripple effect on double-tap (Google Files style)
+            SeekRipple(
+              trigger: prov.seekRippleTrigger,
+              isRight: prov.seekRippleRight,
+            ),
+
             if (prov.showSeekIndicatorLeft)
               SeekIndicator(
                 left: true,

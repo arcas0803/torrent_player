@@ -138,6 +138,12 @@ class PlayerProvider extends ChangeNotifier {
   bool _seekIndicatorLeft = false;
   bool _seekIndicatorRight = false;
 
+  /// Incremented on every double-tap to drive the ripple animation.
+  int _seekRippleTrigger = 0;
+
+  /// Side of the last double-tap: `true` = right (forward), `false` = left.
+  bool _seekRippleRight = false;
+
   /// Accumulated seconds shown in the seek indicator.
   int get tapSeekSeconds => _tapSeekSeconds;
 
@@ -147,11 +153,20 @@ class PlayerProvider extends ChangeNotifier {
   /// Whether the right seek indicator bubble is visible.
   bool get showSeekIndicatorRight => _seekIndicatorRight;
 
+  /// Monotonically-increasing counter incremented on each double-tap.
+  /// Watch this value to restart the ripple animation on successive taps.
+  int get seekRippleTrigger => _seekRippleTrigger;
+
+  /// Which side the last double-tap was on.
+  bool get seekRippleRight => _seekRippleRight;
+
   /// Registers a double-tap seek gesture.
   ///
   /// [isRight] – `true` for forward (right side), `false` for rewind (left).
   void onDoubleTapSeek(bool isRight) {
     _tapSeekSeconds += 10;
+    _seekRippleTrigger++;
+    _seekRippleRight = isRight;
     _tapResetTimer?.cancel();
     _tapResetTimer = Timer(const Duration(milliseconds: 600), () {
       if (isRight) {

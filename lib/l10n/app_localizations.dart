@@ -176,6 +176,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTitle;
 
+  /// No description provided for @settingsTabSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsTabSystem;
+
   /// No description provided for @settingsSectionTorrent.
   ///
   /// In en, this message translates to:
@@ -391,6 +397,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop casting'**
   String get castDisconnect;
+
+  /// No description provided for @castLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get castLoading;
+
+  /// No description provided for @castError.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback failed on the TV'**
+  String get castError;
 
   /// No description provided for @updateAvailable.
   ///

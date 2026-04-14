@@ -135,12 +135,7 @@ class SeekIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 0,
-      bottom: 0,
-      left: left ? 0 : null,
-      right: left ? null : 0,
-      width: MediaQuery.of(context).size.width * 0.35,
+    return Positioned.fill(
       child: Center(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -190,51 +185,142 @@ class SwipeIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: MediaQuery.of(context).size.height * 0.25,
-      left: isVolume ? 24 : null,
-      right: isVolume ? null : 24,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            width: 44,
-            height: MediaQuery.of(context).size.height * 0.35,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  isVolume ? Icons.volume_up : Icons.brightness_6,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(height: 6),
-                Expanded(
-                  child: RotatedBox(
-                    quarterTurns: 3,
-                    child: LinearProgressIndicator(
-                      value: value,
-                      backgroundColor: Colors.white24,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Colors.white,
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Positioned.fill(
+      child: Center(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              width: 56,
+              height: screenHeight * 0.35,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    isVolume ? Icons.volume_up : Icons.brightness_6,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: RotatedBox(
+                      quarterTurns: 3,
+                      child: LinearProgressIndicator(
+                        value: value,
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${(value * 100).round()}%',
-                  style: const TextStyle(color: Colors.white, fontSize: 11),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    '${(value * 100).round()}%',
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Expanding-circle ripple overlay shown on double-tap seek, similar to
+/// Google Files / YouTube. Clips the circle to the tapped half of the screen.
+///
+/// Restart the animation by incrementing [trigger] (e.g. from PlayerProvider).
+class SeekRipple extends StatefulWidget {
+  /// Monotonically-increasing counter; animation restarts on each change.
+  final int trigger;
+
+  /// `true` = right half (forward), `false` = left half (rewind).
+  final bool isRight;
+
+  const SeekRipple({super.key, required this.trigger, required this.isRight});
+
+  @override
+  State<SeekRipple> createState() => _SeekRippleState();
+}
+
+class _SeekRippleState extends State<SeekRipple>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+  late final Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+    _scale = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _opacity = Tween<double>(
+      begin: 0.35,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(SeekRipple oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.trigger != widget.trigger) {
+      _controller.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    // Circle diameter large enough to fill the half-screen area
+    final diameter = size.height * 1.5;
+    return Positioned.fill(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return ClipRect(
+            child: Align(
+              alignment: widget.isRight
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+              widthFactor: 0.5,
+              child: Center(
+                child: Transform.scale(
+                  scale: _scale.value,
+                  child: Container(
+                    width: diameter,
+                    height: diameter,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: _opacity.value),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

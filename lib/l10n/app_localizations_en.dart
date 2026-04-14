@@ -48,6 +48,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
+  String get settingsTabSystem => 'System';
+
+  @override
   String get settingsSectionTorrent => 'Torrent client';
 
   @override
@@ -164,6 +167,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get castDisconnect => 'Stop casting';
+
+  @override
+  String get castLoading => 'Loading…';
+
+  @override
+  String get castError => 'Playback failed on the TV';
 
   @override
   String get updateAvailable => 'Update available';

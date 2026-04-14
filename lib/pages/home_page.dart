@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   final _magnetController = TextEditingController();
   StreamSubscription<String>? _intentSub;
   bool _isFromDeepLink = false;
+  bool _handledReady = false;
 
   bool get _isMagnetValid =>
       _magnetController.text.trim().startsWith('magnet:');
@@ -59,6 +60,7 @@ class _HomePageState extends State<HomePage> {
   /// and starts loading immediately.
   void _handleIncomingUri(String uri) {
     _isFromDeepLink = true;
+    _handledReady = false;
     final torrent = context.read<TorrentProvider>();
     // Reset any in-progress or completed torrent before starting the new one.
     if (torrent.state != TorrentLoadState.idle) torrent.reset();
@@ -100,6 +102,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onVideoFilesReady(TorrentProvider torrent) {
+    if (_handledReady) return;
+    _handledReady = true;
     if (torrent.videoFiles.length == 1) {
       _startPlaying(torrent, torrent.videoFiles.first);
     } else {
@@ -126,6 +130,11 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _showFilePicker(TorrentProvider torrent) async {
     final l = AppLocalizations.of(context)!;
+    // If launched from a deep link, ensure we're showing home before the dialog
+    // so it doesn't appear on top of an already-running player.
+    if (_isFromDeepLink) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
     final picked = await showDialog<FileInfo>(
       context: context,
       builder: (_) => _VideoFilePickerDialog(files: torrent.videoFiles, l: l),
@@ -147,6 +156,8 @@ class _HomePageState extends State<HomePage> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _onVideoFilesReady(torrent);
           });
+        } else if (torrent.state == TorrentLoadState.idle) {
+          _handledReady = false;
         }
         if (torrent.state == TorrentLoadState.error &&
             torrent.errorMessage != null) {

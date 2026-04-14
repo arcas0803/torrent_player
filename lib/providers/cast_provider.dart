@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_chrome_cast/discovery.dart';
 import 'package:flutter_chrome_cast/entities.dart';
+import 'package:flutter_chrome_cast/enums.dart';
 import 'package:flutter_chrome_cast/media.dart';
 import 'package:flutter_chrome_cast/models.dart';
 import 'package:flutter_chrome_cast/session.dart';
@@ -75,6 +76,11 @@ class CastProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Duration _lastCastPosition = Duration.zero;
+
+  /// Position saved just before disconnecting, used to resume local playback.
+  Duration get lastCastPosition => _lastCastPosition;
+
   /// Connects to [device] and begins casting the media at [streamUrl].
   ///
   /// The [streamUrl] is a local libtorrent HTTP address which gets rewritten
@@ -82,21 +88,34 @@ class CastProvider extends ChangeNotifier {
   /// can reach it.
   Future<void> connectAndCast(GoogleCastDevice device, String streamUrl) async {
     stopDiscovery();
-    _isCasting = true;
     _castDeviceName = device.friendlyName;
     notifyListeners();
 
     try {
       await GoogleCastSessionManager.instance.startSessionWithDevice(device);
-      final castUrl = await CastService.buildCastUrl(streamUrl);
-      if (castUrl == null) return;
+
+      // startSessionWithDevice returns immediately (fire-and-forget on Android).
+      // Wait until the session is truly connected before trying to load media,
+      // otherwise RemoteMediaClient is null and the load is silently dropped.
+      await GoogleCastSessionManager.instance.currentSessionStream
+          .firstWhere(
+            (s) => s?.connectionState == GoogleCastConnectState.connected,
+          )
+          .timeout(const Duration(seconds: 15));
+
+      final castResult = await CastService.buildCastUrl(streamUrl);
+      if (castResult == null) {
+        _castDeviceName = null;
+        notifyListeners();
+        return;
+      }
 
       await GoogleCastRemoteMediaClient.instance.loadMedia(
         GoogleCastMediaInformationAndroid(
-          contentId: castUrl,
+          contentId: castResult.url,
           streamType: CastMediaStreamType.live,
-          contentUrl: Uri.parse(castUrl),
-          contentType: 'video/mp4',
+          contentUrl: Uri.parse(castResult.url),
+          contentType: castResult.contentType,
           metadata: GoogleCastMovieMediaMetadata(
             title: '',
             studio: '',
@@ -106,7 +125,12 @@ class CastProvider extends ChangeNotifier {
         autoPlay: true,
         playPosition: Duration.zero,
       );
-    } catch (_) {
+
+      // Only mark as casting once media load request was accepted.
+      _isCasting = true;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('[CastProvider] connectAndCast error: $e');
       _isCasting = false;
       _castDeviceName = null;
       notifyListeners();
@@ -128,8 +152,13 @@ class CastProvider extends ChangeNotifier {
   }
 
   /// Ends the current Cast session and stops casting.
+  /// Saves the current playback position so local player can resume from it.
   void disconnect() {
+    try {
+      _lastCastPosition = GoogleCastRemoteMediaClient.instance.playerPosition;
+    } catch (_) {}
     GoogleCastSessionManager.instance.endSessionAndStopCasting();
+    CastService.stopProxy();
     _isCasting = false;
     _castDeviceName = null;
     notifyListeners();

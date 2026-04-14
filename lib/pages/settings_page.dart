@@ -14,70 +14,91 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(title: Text(l.settingsTitle)),
-      body: Consumer<SettingsProvider>(
-        builder: (context, settings, _) {
-          return ListView(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            children: [
-              _SectionHeader(l.settingsSectionTorrent),
-              _SpeedTile(
-                label: l.settingsDownloadSpeed,
-                valueBytes: settings.downloadLimitBytes,
-                unlimitedLabel: l.settingsUnlimited,
-                onChanged: (v) => settings.setDownloadLimitBytes(v),
-              ),
-              _SpeedTile(
-                label: l.settingsUploadSpeed,
-                valueBytes: settings.uploadLimitBytes,
-                unlimitedLabel: l.settingsUnlimited,
-                onChanged: (v) => settings.setUploadLimitBytes(v),
-              ),
-              const Divider(),
-              _SectionHeader(l.settingsSectionPlayer),
-              _SliderTile(
-                label: l.settingsCacheSeconds,
-                value: settings.cacheSeconds.toDouble(),
-                min: 1,
-                max: 60,
-                divisions: 59,
-                displayLabel: '${settings.cacheSeconds} s',
-                onChanged: (v) => settings.setCacheSeconds(v.round()),
-              ),
-              _SliderTile(
-                label: l.settingsDemuxerMaxMb,
-                value: settings.demuxerMaxMb.toDouble(),
-                min: 10,
-                max: 500,
-                divisions: 49,
-                displayLabel: '${settings.demuxerMaxMb} MB',
-                onChanged: (v) => settings.setDemuxerMaxMb(v.round()),
-              ),
-              const Divider(),
-              _SectionHeader(l.settingsSectionLanguage),
-              RadioGroup<String>(
-                groupValue: settings.locale,
-                onChanged: (v) => settings.setLocale(v ?? settings.locale),
-                child: Column(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l.settingsTitle),
+          bottom: TabBar(
+            tabs: [
+              Tab(text: l.settingsSectionTorrent),
+              Tab(text: l.settingsTabSystem),
+            ],
+          ),
+        ),
+        body: Consumer<SettingsProvider>(
+          builder: (context, settings, _) {
+            return TabBarView(
+              children: [
+                // ── Torrent tab ──────────────────────────────────────────
+                ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   children: [
-                    RadioListTile<String>(
-                      title: Text(l.settingsLangEs),
-                      value: 'es',
+                    _SpeedTile(
+                      label: l.settingsDownloadSpeed,
+                      valueBytes: settings.downloadLimitBytes,
+                      unlimitedLabel: l.settingsUnlimited,
+                      onChanged: (v) => settings.setDownloadLimitBytes(v),
                     ),
-                    RadioListTile<String>(
-                      title: Text(l.settingsLangEn),
-                      value: 'en',
+                    _SpeedTile(
+                      label: l.settingsUploadSpeed,
+                      valueBytes: settings.uploadLimitBytes,
+                      unlimitedLabel: l.settingsUnlimited,
+                      onChanged: (v) => settings.setUploadLimitBytes(v),
                     ),
                   ],
                 ),
-              ),
-              const Divider(),
-              _SectionHeader(l.settingsSectionUpdates),
-              const _UpdatesSection(),
-            ],
-          );
-        },
+                // ── Sistema tab ──────────────────────────────────────────
+                ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  children: [
+                    _SectionHeader(l.settingsSectionPlayer),
+                    _SliderTile(
+                      label: l.settingsCacheSeconds,
+                      value: settings.cacheSeconds.toDouble(),
+                      min: 1,
+                      max: 60,
+                      divisions: 59,
+                      displayLabel: '${settings.cacheSeconds} s',
+                      onChanged: (v) => settings.setCacheSeconds(v.round()),
+                    ),
+                    _SliderTile(
+                      label: l.settingsDemuxerMaxMb,
+                      value: settings.demuxerMaxMb.toDouble(),
+                      min: 10,
+                      max: 500,
+                      divisions: 49,
+                      displayLabel: '${settings.demuxerMaxMb} MB',
+                      onChanged: (v) => settings.setDemuxerMaxMb(v.round()),
+                    ),
+                    const Divider(),
+                    _SectionHeader(l.settingsSectionLanguage),
+                    RadioGroup<String>(
+                      groupValue: settings.locale,
+                      onChanged: (v) =>
+                          settings.setLocale(v ?? settings.locale),
+                      child: Column(
+                        children: [
+                          RadioListTile<String>(
+                            title: Text(l.settingsLangEs),
+                            value: 'es',
+                          ),
+                          RadioListTile<String>(
+                            title: Text(l.settingsLangEn),
+                            value: 'en',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(),
+                    _SectionHeader(l.settingsSectionUpdates),
+                    const _UpdatesSection(),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -65,8 +65,8 @@ class _CastDeviceDialogState extends State<CastDeviceDialog> {
                       ? Text(device.modelName!)
                       : null,
                   onTap: () {
-                    cast.connectAndCast(device, widget.streamUrl);
                     Navigator.pop(context);
+                    cast.connectAndCast(device, widget.streamUrl);
                   },
                 );
               },

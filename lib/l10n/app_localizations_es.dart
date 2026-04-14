@@ -49,6 +49,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsTitle => 'Ajustes';
 
   @override
+  String get settingsTabSystem => 'Sistema';
+
+  @override
   String get settingsSectionTorrent => 'Cliente torrent';
 
   @override
@@ -165,6 +168,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get castDisconnect => 'Detener reproducción';
+
+  @override
+  String get castLoading => 'Cargando…';
+
+  @override
+  String get castError => 'Error de reproducción en el TV';
 
   @override
   String get updateAvailable => 'Actualización disponible';
