@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -93,6 +94,8 @@ class SettingsPage extends StatelessWidget {
                     const Divider(),
                     _SectionHeader(l.settingsSectionUpdates),
                     const _UpdatesSection(),
+                    const Divider(),
+                    const _AppVersionTile(),
                   ],
                 ),
               ],
@@ -240,19 +243,27 @@ class _UpdatesSectionState extends State<_UpdatesSection> {
       _checking = true;
       _resultMessage = null;
     });
-    final update = await UpdateService.checkForUpdate();
-    if (!mounted) return;
-    setState(() => _checking = false);
-    if (update != null) {
-      showDialog<void>(
-        context: context,
-        builder: (_) => _UpdateSettingsDialog(
-          version: update.version,
-          downloadUrl: update.downloadUrl,
-        ),
-      );
-    } else {
-      setState(() => _resultMessage = l.updateLatest);
+    try {
+      final update = await UpdateService.checkForUpdate();
+      if (!mounted) return;
+      setState(() => _checking = false);
+      if (update != null) {
+        showDialog<void>(
+          context: context,
+          builder: (_) => _UpdateSettingsDialog(
+            version: update.version,
+            downloadUrl: update.downloadUrl,
+          ),
+        );
+      } else {
+        setState(() => _resultMessage = l.updateLatest);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _checking = false;
+        _resultMessage = l.updateCheckError;
+      });
     }
   }
 
@@ -270,6 +281,41 @@ class _UpdatesSectionState extends State<_UpdatesSection> {
             )
           : null,
       onTap: _checking ? null : _check,
+    );
+  }
+}
+
+/// Tile that shows the current app version using PackageInfo.
+class _AppVersionTile extends StatefulWidget {
+  const _AppVersionTile();
+
+  @override
+  State<_AppVersionTile> createState() => _AppVersionTileState();
+}
+
+class _AppVersionTileState extends State<_AppVersionTile> {
+  String? _version;
+
+  @override
+  void initState() {
+    super.initState();
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) setState(() => _version = info.version);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return ListTile(
+      title: Text(
+        _version != null ? l.settingsAppVersion(_version!) : '…',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      dense: true,
     );
   }
 }

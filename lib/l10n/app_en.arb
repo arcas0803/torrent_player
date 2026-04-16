@@ -150,12 +150,22 @@
     "@updateDownload": {},
     "updateLatest": "You have the latest version",
     "@updateLatest": {},
+    "updateCheckError": "Failed to check for updates",
+    "@updateCheckError": {},
     "updateChecking": "Checking for updates…",
     "@updateChecking": {},
     "settingsSectionUpdates": "Updates",
     "@settingsSectionUpdates": {},
     "settingsCheckUpdates": "Check for updates",
     "@settingsCheckUpdates": {},
+    "settingsAppVersion": "Version {version}",
+    "@settingsAppVersion": {
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
     "backgroundNotifTitle": "Torrent Player",
     "@backgroundNotifTitle": {},
     "backgroundNotifText": "Download in progress",

@@ -434,6 +434,12 @@ abstract class AppLocalizations {
   /// **'You have the latest version'**
   String get updateLatest;
 
+  /// No description provided for @updateCheckError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to check for updates'**
+  String get updateCheckError;
+
   /// No description provided for @updateChecking.
   ///
   /// In en, this message translates to:
@@ -451,6 +457,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check for updates'**
   String get settingsCheckUpdates;
+
+  /// No description provided for @settingsAppVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String settingsAppVersion(String version);
 
   /// No description provided for @backgroundNotifTitle.
   ///

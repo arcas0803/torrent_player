@@ -17,33 +17,32 @@ class UpdateService {
   static const _apiUrl =
       'https://api.github.com/repos/arcas0803/torrent_player/releases/latest';
 
-  /// Returns [UpdateInfo] if a newer release is available, otherwise `null`.
+  /// Returns [UpdateInfo] if a newer release is available, `null` if up to
+  /// date, or throws if the check could not be completed (network error, etc.).
   static Future<UpdateInfo?> checkForUpdate() async {
-    try {
-      final packageInfo = await PackageInfo.fromPlatform();
-      final response = await http
-          .get(
-            Uri.parse(_apiUrl),
-            headers: {'Accept': 'application/vnd.github+json'},
-          )
-          .timeout(const Duration(seconds: 10));
+    final packageInfo = await PackageInfo.fromPlatform();
+    final response = await http
+        .get(
+          Uri.parse(_apiUrl),
+          headers: {'Accept': 'application/vnd.github+json'},
+        )
+        .timeout(const Duration(seconds: 10));
 
-      if (response.statusCode != 200) return null;
-
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final tagName = (data['tag_name'] as String? ?? '').replaceFirst(
-        RegExp(r'^v'),
-        '',
-      );
-      final downloadUrl = data['html_url'] as String? ?? '';
-
-      if (tagName.isNotEmpty && _isNewer(tagName, packageInfo.version)) {
-        return UpdateInfo(version: tagName, downloadUrl: downloadUrl);
-      }
-      return null;
-    } catch (_) {
-      return null;
+    if (response.statusCode != 200) {
+      throw Exception('GitHub API returned ${response.statusCode}');
     }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final tagName = (data['tag_name'] as String? ?? '').replaceFirst(
+      RegExp(r'^v'),
+      '',
+    );
+    final downloadUrl = data['html_url'] as String? ?? '';
+
+    if (tagName.isNotEmpty && _isNewer(tagName, packageInfo.version)) {
+      return UpdateInfo(version: tagName, downloadUrl: downloadUrl);
+    }
+    return null;
   }
 
   static bool _isNewer(String remote, String local) {

@@ -55,6 +55,18 @@ class _PlayerPageState extends State<PlayerPage> with WidgetsBindingObserver {
   StreamSubscription<PiPStatus>? _pipSub;
   bool _inPip = false;
 
+  // Cached localized strings for use in lifecycle callbacks.
+  late String _bgNotifTitle;
+  late String _bgNotifText;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l = AppLocalizations.of(context)!;
+    _bgNotifTitle = l.backgroundNotifTitle;
+    _bgNotifText = l.backgroundNotifText;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -115,10 +127,7 @@ class _PlayerPageState extends State<PlayerPage> with WidgetsBindingObserver {
     if (Platform.isAndroid) {
       if (state == AppLifecycleState.paused && !_inPip) {
         _playerProvider.player.pause();
-        BackgroundService.start(
-          title: 'Torrent Player',
-          text: 'Download in progress',
-        );
+        BackgroundService.start(title: _bgNotifTitle, text: _bgNotifText);
       } else if (state == AppLifecycleState.resumed && !_inPip) {
         BackgroundService.stop();
       }

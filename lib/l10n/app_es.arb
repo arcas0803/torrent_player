@@ -56,9 +56,11 @@
     "updateVersion": "La versión {version} está disponible",
     "updateDownload": "Descargar",
     "updateLatest": "Ya tienes la última versión",
+    "updateCheckError": "Error al buscar actualizaciones",
     "updateChecking": "Buscando actualizaciones…",
     "settingsSectionUpdates": "Actualizaciones",
     "settingsCheckUpdates": "Buscar actualizaciones",
+    "settingsAppVersion": "Versión {version}",
     "backgroundNotifTitle": "Torrent Player",
     "backgroundNotifText": "Descarga en progreso"
 }

@@ -190,6 +190,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get updateLatest => 'Ya tienes la última versión';
 
   @override
+  String get updateCheckError => 'Error al buscar actualizaciones';
+
+  @override
   String get updateChecking => 'Buscando actualizaciones…';
 
   @override
@@ -197,6 +200,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsCheckUpdates => 'Buscar actualizaciones';
+
+  @override
+  String settingsAppVersion(String version) {
+    return 'Versión $version';
+  }
 
   @override
   String get backgroundNotifTitle => 'Torrent Player';
