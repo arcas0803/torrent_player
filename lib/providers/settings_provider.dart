@@ -17,8 +17,8 @@ class SettingsProvider extends ChangeNotifier {
 
   int _downloadLimitBytes = 0;
   int _uploadLimitBytes = 0;
-  int _cacheSeconds = 60;
-  int _demuxerMaxMb = 500;
+  int _cacheSeconds = 10;
+  int _demuxerMaxMb = 50;
   String _locale = 'es';
 
   /// Maximum download speed in bytes/s (0 = unlimited).
@@ -41,8 +41,8 @@ class SettingsProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _downloadLimitBytes = prefs.getInt(_keyDownload) ?? 0;
     _uploadLimitBytes = prefs.getInt(_keyUpload) ?? 0;
-    _cacheSeconds = prefs.getInt(_keyCacheSec) ?? 60;
-    _demuxerMaxMb = prefs.getInt(_keyDemuxMb) ?? 500;
+    _cacheSeconds = prefs.getInt(_keyCacheSec) ?? 10;
+    _demuxerMaxMb = prefs.getInt(_keyDemuxMb) ?? 50;
     _locale = prefs.getString(_keyLocale) ?? 'es';
 
     // Apply saved speed limits to the engine immediately on load
