@@ -94,3 +94,4 @@ jobs:
             ## Download
             Install the APK directly — no Play Store needed.
           files: build/app/outputs/flutter-apk/app-release.apk
+          fail_on_unmatched_files: true
